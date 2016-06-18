@@ -1,0 +1,16 @@
+body {
+	margin: 0px;
+	padding: 0px;
+}
+
+#msgs {
+	margin-left: 10px;
+	margin-top: 10px;
+	width: 75%;
+	height: 50%;
+	resize: none;
+}
+#test {
+	width: 50%;
+	height: 32px;
+}

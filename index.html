@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<html>
+<link href="indexcss.css" rel="stylesheet">
+<script src="jq300min.js"></script>
+<head>
+	<title>ggbotmo</title>
+</head>
+<body>
+
+<!-- UI -->
+<textarea rows="20" cols="40" id="msgs" name="chatmsg" readonly="true">Text</textarea>
+<!-- end UI -->
+<p id="test">Test</p>
+
+<script>
+console.log("test");
+$("#test").text("Starting...");
+$("#msgs").append("\n"+"Starting");
+
+var socket = new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
+//chat.goodgame.ru:8081/chat/websocket
+var sys_str = "";
+
+socket.onopen = function() {
+	sys("Open");
+};
+
+socket.onclose = function(event) {
+	if (event.wasClean) {
+		sys("closed");
+	}else{
+		sys("abort connection");
+	}
+	sys("code err: "+event.code + ' why: '+event.reason);
+};
+
+socket.onmessage = function(event) {
+	sys("msg_data: "+event.data);
+};
+
+socket.onerror = function(error) {
+	sys("error: "+error.data);
+};
+
+
+$("#test").text("done.");
+function sys(str) {
+	$("#msgs").append("\n"+str);
+}
+</script>
+
+</body>
+</html>
