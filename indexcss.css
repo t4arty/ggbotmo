@@ -2,15 +2,42 @@ body {
 	margin: 0px;
 	padding: 0px;
 }
-
+#left {
+	width: 50%;
+	float: left;
+}
+#right {
+	width: 40%;
+	float: left;
+	margin-left: 20px;
+}
 #msgs {
-	margin-left: 10px;
-	margin-top: 10px;
-	width: 75%;
-	height: 50%;
+	width: 100%;
 	resize: none;
+	overflow-y: scroll;
+	margin-left: 10px;
 }
 #test {
 	width: 50%;
 	height: 32px;
+}
+
+input {
+
+}
+
+#login {
+	line-height: 20px;
+	width: 100%;
+	margin-bottom: 5px;
+}
+#password {
+	line-height: 20px;
+	width: 100%;
+	margin-bottom: 5px;
+}
+#send {
+	line-height: 20px;
+	margin-left: 25%;
+	width: 50%;
 }

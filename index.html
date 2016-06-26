@@ -3,22 +3,29 @@
 <html>
 <link href="indexcss.css" rel="stylesheet">
 <script src="jq300min.js"></script>
+<script type="text/javascript" src="botdata.js"></script>
 <head>
 	<title>ggbotmo</title>
 </head>
 <body>
 
 <!-- UI -->
+<div id="left">
 <textarea rows="20" cols="40" id="msgs" name="chatmsg" readonly="true">Text</textarea>
+</div>
+<div id="right">
+<input type="text" id="login" name="login_site"></input>
+<input type="text" id="password" name="password_site"></input>
+<button id="send" name="send_button">Auth site</button>
+</div>
 <!-- end UI -->
 <p id="test">Test</p>
-
 <script>
 console.log("test");
 $("#test").text("Starting...");
 $("#msgs").append("\n"+"Starting");
 
-var socket = new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
+var socket; //= new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
 //chat.goodgame.ru:8081/chat/websocket
 var sys_str = "";
 
@@ -35,8 +42,11 @@ socket.onclose = function(event) {
 	sys("code err: "+event.code + ' why: '+event.reason);
 };
 
+var m = "";
+
 socket.onmessage = function(event) {
 	sys("msg_data: "+event.data);
+	
 };
 
 socket.onerror = function(error) {
