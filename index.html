@@ -15,16 +15,62 @@
 </div>
 <div id="right">
 <input type="text" id="login" name="login_site"></input>
-<input type="text" id="password" name="password_site"></input>
+<input type="password" id="password" name="password_site"></input>
 <button id="send" name="send_button">Auth site</button>
+
+<ul id="c_info">
+	<li>Channel ID:</li>
+	<li>Channel Name:</li>
+	<li>All specs:</li>
+	<li>Users:</li>
+</ul>
+
+<!-- select -->
+<select id="selectid" name="nselect" size="3">
+	<option selected value="sp1">sp1</option>
+</select>
+<button id="chatnumber" name="forchatchoose">Connect id chat</button>
+<button id="chatnumber5" name="out">Quit chat</button>
 </div>
+<!-- no select -->
+
 <!-- end UI -->
+
 <p id="test">Test</p>
+
 <script>
+var inChat = false;
 console.log("test");
 $("#test").text("Starting...");
 $("#msgs").append("\n"+"Starting");
 
+//list
+var chats = [];
+var chats_str="";
+var chat_list = $("#selectid");
+
+for(var i=0;i<25;i++) {
+	chats.push(i);
+}
+for(var i=0;i<chats.length;i++) {
+	$("#selectid").append($('<option value=\"'+i+'\">'+Math.random()+'</option>'));
+}
+$("#chatnumber").click(function (){
+	$("#test").text($("#selectid :selected").text());
+	inChat = true;
+	$("#chatnumber").attr("disabled","disabled");
+	$("#selectid").attr("disabled","disabled");
+});
+$("#chatnumber5").click(function(){
+	inChat = false;
+	$("#chatnumber").removeAttr("disabled");
+	$("#selectid").removeAttr("disabled");
+});
+$("#selectid").on('dblclick','option',function(){
+	$("#test").append("--34563");
+});
+//
+/*
 var socket; //= new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
 //chat.goodgame.ru:8081/chat/websocket
 var sys_str = "";
@@ -52,7 +98,7 @@ socket.onmessage = function(event) {
 socket.onerror = function(error) {
 	sys("error: "+error.data);
 };
-
+*/
 
 $("#test").text("done.");
 function sys(str) {
