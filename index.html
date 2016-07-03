@@ -3,7 +3,7 @@
 <html>
 <link href="indexcss.css" rel="stylesheet">
 <script src="jq300min.js"></script>
-<script type="javascript" src="botdata.js"></script>
+<script src="botdata.js"></script>
 <head>
 	<title>ggbotmo</title>
 </head>
@@ -19,10 +19,10 @@
 <button id="send" name="send_button">Auth site</button>
 
 <ul id="c_info">
-	<li>Channel ID:</li>
-	<li>Channel Name:</li>
-	<li>All specs:</li>
-	<li>Users:</li>
+	<li id="ch_id">Channel ID:</li>
+	<li id="ch_name">Channel Name:</li>
+	<li id="allspec">All specs:</li>
+	<li id="users">Users:</li>
 </ul>
 
 <!-- select -->
@@ -40,48 +40,126 @@
 
 <script>
 var inChat = false;
-console.log("test");
+//consts
+$("#send").attr("disabled","disabled");
+//
 $("#test").text("Starting...");
 $("#msgs").append("\n"+"Starting");
 
+//mass variable
+var ch;
+var channelName;
 //list
+/*
 var chats = [];
 var chats_str="";
 var chat_list = $("#selectid");
-//auth
-var obj_auth;
-//
 
 for(var i=0;i<25;i++) {
 	chats.push(i);
 }
 for(var i=0;i<chats.length;i++) {
 	$("#selectid").append($('<option value=\"'+i+'\">'+Math.random()+'</option>'));
+}*/
+//
+
+//auth on chat
+function msg_auth() {
+	var data = {
+		user_id:uid,
+		token:tok
+	}
+	var r = {
+		type:"auth",
+		data
+	}
+	return JSON.stringify(r);
 }
+var e = msg_auth();
+//
+// get channels
+function msg_getchannels() {
+	var data = {
+		start:0,
+		count:25
+	}
+	var r = {
+		type:"get_channels_list",
+		data
+	}
+	var o = JSON.stringify(r);
+	return o;
+}
+//
+function getChannelName() {
+	return channelName;
+}
+//fill list of channels
+function fill_list(json) {
+	var j = json;
+	var chs = j.data.channels;
+	ch = chs;
+	var o = 0; //for count in list
+	//add to list channel id and name
+	for(var cc in chs) {
+		$("#selectid").append($('<option value=\"'+o+'\">'+chs[cc].channel_id+':'+chs[cc].channel_name+'</option>'));
+		o+=1;
+	}
+	o = 0;
+}
+//
+//info update channel
+function updateInfoChannel(json) {
+	var j = json;
+	$("#ch_id").text('id: '+j.data.channel_id);
+	$("#ch_name").text('chat name: '+getChannelName());
+	$("#allspec").text('Not Auth: '+j.data.clients_in_channel);
+	$("#users").text('Auth users: '+j.data.users_in_channel);
+}
+//
+
 $("#chatnumber").click(function (){
 	$("#test").text($("#selectid :selected").text());
 	inChat = true;
 	$("#chatnumber").attr("disabled","disabled");
 	$("#selectid").attr("disabled","disabled");
+
+	var joinChat = {
+		type:"join",
+		data: {
+			channel_id:$("#selectid :selected").text(),
+			hidden: false
+		}
+	};
+	var s = $("#selectid :selected").text();
+	channelName = s.substring(s.indexOf(':')+1,s.length);
+	socket.send(JSON.stringify(joinChat));
 });
 $("#chatnumber5").click(function(){
 	inChat = false;
 	$("#chatnumber").removeAttr("disabled");
 	$("#selectid").removeAttr("disabled");
+
+	var exitChat = {
+		type: "unjoin",
+		data: {
+			channel_id:$("#selectid :selected").text()
+		}
+	};
+	socket.send(JSON.stringify(exitChat));
 });
 $("#selectid").on('dblclick','option',function(){
 	$("#test").append("--34563");
 });
 //
 
-
-/*
-var socket; //= new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
+var socket = new WebSocket("ws://chat.goodgame.ru:8081/chat/websocket");
 //chat.goodgame.ru:8081/chat/websocket
 var sys_str = "";
 
 socket.onopen = function() {
 	sys("Open");
+	socket.send(e);
 };
 
 socket.onclose = function(event) {
@@ -93,53 +171,25 @@ socket.onclose = function(event) {
 	sys("code err: "+event.code + ' why: '+event.reason);
 };
 
-var m = "";
-
 socket.onmessage = function(event) {
 	sys("msg_data: "+event.data);
-	
+	var succ = JSON.parse(event.data);
+	if (succ.type == 'success_auth') {
+		socket.send(msg_getchannels()); //get channels
+	}
+	if (succ.type == 'channels_list') {
+		fill_list(succ);
+	}
+	if (succ.type =='channel_counters') {
+		updateInfoChannel(succ);
+	}
 };
 
 socket.onerror = function(error) {
 	sys("error: "+error.data);
 };
-*/
-//auth button
-$("#send").click(function(){
-	doAuth();
-	$("#send").attr("disabled","disabled");
-});
-//take auth with site goodgame.ru
-function doAuth() {
-	var res = new XMLHttpRequest();
-	var l = "";
-	var p = "";
-	var r = "login="+encodeURIComponent($("#login").val())+"&password="+encodeURIComponent($("#password").val());
-	console.log(r);
-	res.open('GET','http://goodgame.ru/ajax/chatlogin/',true);
-	res.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    res.setRequestHeader("Accept","text/plain;charset=UTF-8");
-	res.send(r);
-	res.onreadystatechange = function() {
-		if (res.readyState != 4) return;
-		$("#msgs").append("\n"+"Site authing...");
-		if (res.status != 200) {
-			$("#msgs").append("\n"+"Status err: "+res.statusText);
-		}else{
-			$("#msgs").append("\n"+"Status good: "+res.responseText);
-		}
-		AuthComplete(res);
-		$("#send").removeAttr("disabled");
-	};
-}
-//
 
 $("#test").text("done.");
-
-function AuthComplete(req) {
-	obj_auth = req;
-	console.log(obj_auth);
-}
 
 function sys(str) {
 	$("#msgs").append("\n"+str);
