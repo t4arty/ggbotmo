@@ -5,6 +5,7 @@
 <script src="jq300min.js"></script>
 <script src="botdata.js"></script>
 <head>
+	<meta charset="utf-8">
 	<title>ggbotmo</title>
 </head>
 <body>
@@ -33,35 +34,24 @@
 <button id="chatnumber5" name="out">Quit chat</button>
 </div>
 <!-- no select -->
+<div id="msg_chat">
 
+</div>
 <!-- end UI -->
-
 <p id="test">Test</p>
 
 <script>
 var inChat = false;
+var nickChannel='';
 //consts
 $("#send").attr("disabled","disabled");
 //
 $("#test").text("Starting...");
 $("#msgs").append("\n"+"Starting");
-
+//
 //mass variable
 var ch;
 var channelName;
-//list
-/*
-var chats = [];
-var chats_str="";
-var chat_list = $("#selectid");
-
-for(var i=0;i<25;i++) {
-	chats.push(i);
-}
-for(var i=0;i<chats.length;i++) {
-	$("#selectid").append($('<option value=\"'+i+'\">'+Math.random()+'</option>'));
-}*/
-//
 
 //auth on chat
 function msg_auth() {
@@ -111,11 +101,55 @@ function fill_list(json) {
 //info update channel
 function updateInfoChannel(json) {
 	var j = json;
-	$("#ch_id").text('id: '+j.data.channel_id);
+	$("#ch_id").text('id: '+j.data.channel_id+' nick: '+nickChannel);
 	$("#ch_name").text('chat name: '+getChannelName());
 	$("#allspec").text('Not Auth: '+j.data.clients_in_channel);
 	$("#users").text('Auth users: '+j.data.users_in_channel);
 }
+//
+//send msg in chat by id
+function msg_send(id, msgChat) {
+	var o = {
+		type:"send_message",
+		data: {
+			channel_id:""+id,
+			text:""+msgChat,
+			hideIcon:false,
+			mobile:false
+		}
+	};
+	var j = JSON.stringify(o);
+	return o;
+}
+//
+//update channel id and write nick channel
+	function update_id_name(json) {
+		var j = json;
+		var ch = j.data.channel_id;
+		var n = j.data.channel_streamer.name;
+		nickChannel = n;
+		$("#ch_id").text("id: "+ch+" nick: "+n);
+		j = '';
+		ch = '';
+		n = '';
+	}
+//
+//pure msg from channel
+	function msg_come(json) {
+		var j = json;
+		var msg = j.data.parsed; //parsed msg
+		var d = new Date();
+		var t_msg = j.data.timestamp*1000; //msg time
+		d.setTime(t_msg);
+		var user_name = j.data.user_name; //who send msg
+		//to msg_chat
+		var h = d.getHours();
+		var m = d.getMinutes();
+		var s = d.getSeconds();
+		$("#msg_chat").append(" "+h+":"+m+":"+s+" | "+user_name+": "+msg+"<br>");
+		//cls
+		j = msg = t_msg = user_name = '';
+	}
 //
 
 $("#chatnumber").click(function (){
@@ -183,6 +217,16 @@ socket.onmessage = function(event) {
 	if (succ.type =='channel_counters') {
 		updateInfoChannel(succ);
 	}
+	if (succ.type == 'success_join') {
+		update_id_name(succ);
+	}
+	if (succ.type == 'message') {
+		msg_come(succ);
+		$("#msg_chat").scrollTop($("#msg_chat")[0].scrollHeight);
+	}
+	//scroll down area text
+	$("#msgs").scrollTop($("#msgs")[0].scrollHeight);
+	//
 };
 
 socket.onerror = function(error) {
@@ -194,6 +238,8 @@ $("#test").text("done.");
 function sys(str) {
 	$("#msgs").append("\n"+str);
 }
+
+
 </script>
 
 </body>

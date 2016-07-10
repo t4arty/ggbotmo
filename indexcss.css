@@ -82,3 +82,13 @@ input[type=password] {
 	padding-left: 3px;
 	line-height: 16px;
 }
+
+#msg_chat {
+	width: 90%;
+	height: 300px;
+	border: 1px solid #ff0000;
+	display: block;
+	float: left;
+	margin-left: 10px;
+	overflow-y: scroll; 
+}
